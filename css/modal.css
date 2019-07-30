@@ -1,0 +1,50 @@
+.modalContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.3);
+  z-index: 3;
+}
+
+.modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 0.25rem;
+  box-shadow:0 8px 16px rgba(0,0,0,0.3);
+  width: 800px;
+  height: 600px;
+}
+
+.modal h2 {
+  font-weight: 300;
+  margin: 0;
+  padding: 0 1rem;
+  line-height: 4rem;
+}
+
+.modalBody {
+  padding: 1rem;
+  font-weight: 300;
+}
+
+.modalBody p:first-child {
+  margin-top: 0;
+}
+
+.modal button {
+  float: right;
+  color: #09f;
+  border-bottom: 2px solid currentColor;
+}
+
+.modal input {
+  max-width: 100%;
+  width: 500px;
+  margin: 1.5rem 0;
+  font-weight: 300;
+}

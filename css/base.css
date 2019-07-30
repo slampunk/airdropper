@@ -1,0 +1,55 @@
+main {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+                circle at 50% calc(100% - 5rem),
+                transparent 0%,
+                transparent calc(20% - 1px),
+                var(--main-arc-slice-bg) 20%,
+                transparent calc(20% + 1px),
+                transparent calc(40% - 1px),
+                var(--main-arc-slice-bg) 40%,
+                transparent calc(40% + 1px),
+                transparent calc(60% - 1px),
+                var(--main-arc-slice-bg) 60%,
+                transparent calc(60% + 1px),
+                transparent calc(80% - 1px),
+                var(--main-arc-slice-bg) 80%,
+                transparent calc(80% + 1px),
+                transparent calc(100% - 1px),
+                var(--main-arc-slice-bg) 100%,
+                transparent calc(100% + 1px),
+                transparent calc(120% - 1px),
+                var(--main-arc-slice-bg) 120%,
+                transparent calc(120% + 1px)
+             ),
+             var(--main-bg);
+  background: repeating-radial-gradient(
+                circle at 50% calc(100% - 15rem),
+                transparent 0%,
+                transparent calc(9rem - 1px),
+                var(--main-arc-slice-bg) 9rem,
+                transparent calc(9rem + 1px)
+              ),
+              var(--main-bg);
+}
+
+@supports (background: conic-gradient(#fff, #000)) {
+  main {
+  background: conic-gradient(
+                at 50% calc(100% - 15rem),
+                transparent 120deg,
+                var(--main-bg) 120deg 240deg,
+                transparent 240deg
+              ),
+              repeating-radial-gradient(
+                circle at 50% calc(100% - 15rem),
+                transparent 0%,
+                transparent calc(9rem - 1px),
+                var(--main-arc-slice-bg) 9rem,
+                transparent calc(9rem + 1px)
+              ),
+              var(--main-bg);
+  }
+}

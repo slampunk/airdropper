@@ -1,0 +1,198 @@
+.user {
+  position: absolute;
+  width: 8rem;
+  height: 8rem;
+  border-radius: 4rem;
+  margin: -4rem;
+  z-index: 1;
+}
+
+.user::before,
+.user::after {
+  position: absolute;
+  content: '';
+  z-index: -1;
+  width: 8rem;
+  height: 8rem;
+  top: 0;
+  left: 0;
+  border-radius: 4rem;
+  background: var(--user-bg);
+  transition: width 0.4s;
+  pointer-events: none;
+}
+
+.user::after {
+  z-index: 1;
+  background: radial-gradient(
+                circle at 50% 3.5rem,
+                var(--user-bg) 0%,
+                var(--user-bg) 20%,
+                var(--main-bg) calc(20% + 1px),
+                var(--main-bg) calc(20% + 4px),
+                var(--user-bg) calc(20% + 5px),
+                var(--user-bg) calc(20% + 10px),
+                transparent calc(20% + 11px)
+              ),
+              linear-gradient(90deg,
+                var(--user-bg) 0%,
+                var(--user-bg) calc(25% - 4px),
+                transparent calc(25% - 3px),
+                transparent calc(75% + 3px),
+                var(--user-bg) calc(75% + 4px)
+              ),
+              linear-gradient(
+                transparent 0%,
+                transparent 83%,
+                var(--main-bg) calc(83% + 1px),
+                var(--main-bg) calc(83% + 4px),
+                var(--user-bg) calc(83% + 5px)
+              ),
+              radial-gradient(
+                circle at 50% 6.75rem,
+                transparent 0%,
+                transparent 25%,
+                var(--main-bg) calc(25% + 1px),
+                var(--main-bg) calc(25% + 4px),
+                var(--user-bg) calc(25% + 5px),
+                var(--user-bg) calc(25% + 7px),
+                transparent calc(25% + 7px)
+              )
+              var(--user-bg);
+}
+
+.user.loading::after {
+  background: radial-gradient(
+                circle at 50% 50%,
+                var(--user-bg) 0%,
+                var(--user-bg) 40%,
+                var(--main-bg) calc(40% + 1px),
+                var(--main-bg) calc(40% + 5px),
+                var(--user-bg) calc(40% + 6px)
+              ),
+              var(--main-bg);
+  clip-path: polygon(50% 0, 50% 50%, 100% 25%, 100% 100%, 0 100%, 0 0);
+  animation: spin 1s infinite cubic-bezier(0.5, 0.3, 0.5, 0.7);
+}
+
+.user.local {
+  left: 50%;
+  bottom: 15rem;
+  z-index: 2;
+}
+
+.userList {
+  position: absolute;
+  left: 50%;
+  bottom: 15rem;
+  transform-style: preserve-3d;
+}
+
+.userList > li {
+  width: 8rem;
+  height: 8rem;
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: -4rem;
+}
+
+.userList > li:nth-of-type(-n+5) {
+  transform-origin: center 31rem;
+}
+
+.userList .user {
+  transform-origin: 50% 50%;
+  top: 0;
+  left: 0;
+  margin: 0;
+}
+
+.userList > li:nth-of-type(1) {
+  transform: translateY(-27rem) rotate(-60deg);
+}
+
+.userList > li:nth-of-type(1) .user {
+  transform: rotate(60deg);
+}
+
+
+.userList > li:nth-of-type(2) {
+  transform: translateY(-27rem) rotate(-20deg);
+}
+
+.userList > li:nth-of-type(2) .user {
+  transform: rotate(20deg);
+}
+
+.userList > li:nth-of-type(3) {
+  transform: translateY(-27rem) rotate(20deg);
+}
+
+.userList > li:nth-of-type(3) .user {
+  transform: rotate(-20deg);
+}
+
+.userList > li:nth-of-type(4) {
+  transform: translateY(-27rem) rotate(60deg);
+}
+
+.userList > li:nth-of-type(4) .user {
+  transform: rotate(-60deg);
+}
+
+.user__name {
+  width: 100%;
+  color: white;
+  padding-top: 9rem;
+  display: inline-block;
+  cursor: pointer;
+  text-align: center;
+}
+
+.user__options {
+  position: absolute;
+  top: 0;
+  left: 7rem;
+  width: 8rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s, visibility 0s 0.25s;
+  padding: 1.5rem 0;
+  z-index: 2;
+}
+
+input:checked ~ .user .user__options {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.25s 0.4s, visibility 0s;
+}
+
+input:checked ~ .user::before {
+  width: 15rem;
+  transition: width 0.4s;
+}
+
+.user__options li {
+  font-size: 1.25rem;
+  padding: 0.125rem;
+  cursor: pointer;
+}
+
+.user__options button {
+  display: block;
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 1.25rem;
+  padding: 0;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
