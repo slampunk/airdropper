@@ -15,12 +15,14 @@ export default class PeerManager {
   }
 
   initiatePeerConnection = connectionId => {
-    this.peers[connectionId] = new PeerConnection({ emitter: this.emitter, peerId: connectionId, initiate: true });
+    if (!this.peers.hasOwnProperty(connectionId)) {
+      this.peers[connectionId] = new PeerConnection({ emitter: this.emitter, peerId: connectionId, initiate: true });
+    }
   }
 
   handlePeerConnectionResponse = (data) => {
     const { target } = data;
-    if (!this.peers[target]) {
+    if (!this.peers.hasOwnProperty(target)) {
       this.peers[target] = new PeerConnection({ emitter: this.emitter, peerId: target, initiate: false });
     }
 

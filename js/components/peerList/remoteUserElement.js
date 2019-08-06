@@ -104,6 +104,10 @@ export default class RemoteUserElement {
   }
 
   appendConnectingSvg = () => {
+    if (this.element.querySelector('.connecting')) {
+      return;
+    }
+
     const transformation = this.transformCSS;
     const width = transformation.translateY - transformation.elementWidth - 10;
     const svg = document.createElementNS(xmlns, 'svg');
@@ -128,6 +132,10 @@ export default class RemoteUserElement {
   }
 
   appendConnectedSvg = () => {
+    if (this.element.querySelector('.connected')) {
+      return;
+    }
+
     this.removeConnectingSvg();
     const transformation = this.transformCSS;
     const width = transformation.translateY - transformation.elementWidth - 15;
@@ -156,6 +164,11 @@ export default class RemoteUserElement {
   attachEvents = () => {
     this.emitter.on('peer.connection.initiate', id => {
       if (id === this.id) {
+        this.appendConnectingSvg();
+      }
+    });
+    this.emitter.on('peerconnection', ({ target }) => {
+      if (target === this.id) {
         this.appendConnectingSvg();
       }
     });
