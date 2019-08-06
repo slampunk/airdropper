@@ -38,9 +38,13 @@ export default class EventEmitter {
     }
 
     for (let token in this.listener[ev]) {
-      let fn = this.listener[ev][token].fn;
-      let scope = this.listener[ev][token].scope || null;
-      fn.apply(scope, args);
+      try {
+        let fn = this.listener[ev][token].fn;
+        let scope = this.listener[ev][token].scope || null;
+        fn.apply(scope, args);
+      } catch(e) {
+        console.log(e, ev, this.listener[ev]);
+      }
     }
   }
 }

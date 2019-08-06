@@ -95,6 +95,7 @@
   top: 0;
   left: 0;
   margin: -4rem;
+  transition: transform 0.5s;
 }
 
 .userList > li:nth-of-type(-n+5) {
@@ -106,6 +107,7 @@
   top: 0;
   left: 0;
   margin: 0;
+  transition: transform 0.5s;
 }
 
 .userList > li:nth-of-type(1) {
@@ -194,5 +196,46 @@ input:checked ~ .user::before {
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+/* SVGs */
+
+.connecting, .connected {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin: 0 -4px;
+  transform-origin: 0 50%;
+  transform: rotate(90deg);
+}
+
+.connected {
+  margin: 0 -8px;
+}
+
+.connecting line, .connecting path {
+  animation: pathMove 0.5s infinite linear;
+}
+
+.connected line {
+  transition: stroke-dashoffset 0.5s ease-out;
+  stroke-dashoffset: 100%;
+  animation: something 1.5s cubic-bezier(0, 0.25, 0.75, 1);
+  animation-fill-mode: forwards;
+}
+
+@keyframes pathMove {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -38;
+  }
+}
+
+@keyframes something {
+  to {
+    stroke-dashoffset: 0;
   }
 }

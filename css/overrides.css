@@ -29,6 +29,7 @@ button {
   font-size: 1rem;
   background: none;
   border: none;
+  font-family: 'Open Sans', Ubuntu, Cantarell, Roboto, 'Segoe UI', 'Helvetica Neue', Verdana, sans-serif;
 }
 
 input {
