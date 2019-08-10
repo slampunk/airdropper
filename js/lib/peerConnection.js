@@ -5,56 +5,60 @@ const pc_config = {
   ]
 };
 
+import PeerMessenger from './peerMessenger.js';
+
 export default class PeerConnection {
   constructor({ emitter, peerId, initiate = false}) {
     this.emitter = emitter;
     this.id = peerId;
+    this.candidatesQueue = [];
+    this.messenger = null;
 
     this.pc = new RTCPeerConnection(pc_config);
-    this.fileChunk = 16384;
-    this.candidatesQueue = [];
-    this.fileTransfers = {};
+
     this.handleRTCEvents();
 
     initiate && this.initiateConnection();
   }
 
   initiateConnection() {
-    this.pc.createDataChannel('channel');
-    this.setChannelEvents();
+    this.channel = this.pc.createDataChannel('channel');
+    this.messenger = new PeerMessenger(this);
     this.sendOffer();
   }
 
   handleRTCEvents() {
-    this.pc.onicecandidate = evt => {
-      if (evt.candidate) {
-        const details = {
-          ...evt.candidate.toJSON(),
-          type: 'candidate'
-        };
-        this.sendCommunication('peer.connection.config', { target: this.id, details: details });
-      }
-    }
-
-    this.pc.oniceconnectionstatechange = evt => {
-      const isConnected = ['connected', 'completed'].find(state => state === this.pc.iceConnectionState);
-      if (isConnected) {
-        console.log('peer connection established');
-        this.emitter.emit('peer.connection.established', this.id);
-      }
-    }
-
-    this.pc.ondatachannel = evt => {
-      this.dataChannel = this.dataChannel || evt.channel;
-    }
-
-    this.emitter.on(`peer.connection.remoteDesc.set.${this.id}`, () => {
-      this.candidatesQueue.splice(0)
-        .forEach(candidate => this.pc.addIceCandidate(candidate));
-    });
+    this.pc.onicecandidate = this.handleIceCandidate;
+    this.pc.oniceconnectionstatechange = this.handleIceStateChange;
+    this.pc.ondatachannel = this.setupDataChannel;
+    this.emitter.on(`peer.connection.remoteDesc.set.${this.id}`, this.handleRemoteDescriptionAvailable);
   }
 
-  setChannelEvents = () => {
+  handleIceCandidate = (e) => {
+    if (e.candidate) {
+      const details = {
+        ...e.candidate.toJSON(),
+        type: 'candidate'
+      };
+      this.sendCommunication('peer.connection.config', { target: this.id, details: details });
+    }
+  }
+
+  handleIceStateChange = (e) => {
+    const isConnected = ['connected', 'completed'].find(state => state === this.pc.iceConnectionState);
+    if (isConnected) {
+      this.emitter.emit('peer.connection.established', this.id);
+    }
+  }
+
+  handleRemoteDescriptionAvailable = () =>
+    this.candidatesQueue.splice(0)
+      .forEach(candidate => this.pc.addIceCandidate(candidate));
+
+  setupDataChannel = (e) => {
+    this.channel = this.channel || e.channel;
+    this.channel.binaryType = 'arraybuffer';
+    this.messenger = new PeerMessenger({ emitter: this.emitter, id: this.id, channel: this.channel });
   }
 
   sendOffer() {
@@ -74,8 +78,8 @@ export default class PeerConnection {
   }
 
   sendCommunication(evtName, data) {
-    if (this.pc.dataChannel && this.pc.dataChanel.readyState === 'open') {
-      return this.sendMessage(evtName, data);
+    if (this.messenger && this.messenger.channel.readyState === 'open') {
+      return this.messenger.send({ event: evtName, payload: data });
     }
 
     this.emitter.emit('ws.send', { action: 'peerconnection', payload: data });

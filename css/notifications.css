@@ -1,0 +1,76 @@
+.notifications {
+  position: absolute;
+  bottom: 22rem;
+  left: 50%;
+  width: 25rem;
+  margin-left: -12.5rem;
+  display: flex;
+  flex-direction: column-reverse;
+  z-index: 3;
+}
+
+.notifications li {
+  background: white;
+  padding: 1rem;
+  font-weight: 300;
+  margin-top: 1rem;
+}
+
+.notifications li.complete {
+  opacity: 0;
+  height: 0 !important;
+  padding: 0;
+  transition: opacity 0.3s, height 0.3s 0.3s, padding 0.3s 0.3s;
+}
+
+.notifications li .username {
+  font-weight: 500;
+}
+
+.notifications .flex {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.notifications .flex span {
+  display: inline-block;
+  vertical-align: top;
+  padding: 0.25rem 0;
+  width: 20%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.notifications .flex span:nth-of-type(2n) {
+  width: 80%;
+}
+
+.notifications .flex.actions {
+  flex-direction: row-reverse;
+  justify-content: flex-start;
+  margin: 1rem 0 0;
+}
+
+.notifications .actions button {
+  border: none;
+  border-bottom: 2px solid currentColor;
+  background: none;
+  font-size: 1rem;
+  margin-left: 1rem;
+  line-height: 1.75rem;
+}
+
+.btn-success {
+  color: #2e8b57;
+}
+
+.btn-error {
+  color: #ff2015;
+}
+
+.notifications .actions .btn-success.btn-secondary {
+  color: #4477b2;
+  margin-right: auto;
+  margin-left: 0;
+}

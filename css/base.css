@@ -35,6 +35,10 @@ main {
               var(--main-bg);
 }
 
+.flex {
+  display: flex;
+}
+
 @supports (background: conic-gradient(#fff, #000)) {
   main {
   background: conic-gradient(

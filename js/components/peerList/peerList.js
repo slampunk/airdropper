@@ -5,6 +5,7 @@ export default class PeerList {
     this.emitter = props.emitter;
 
     this.users = [];
+    this.userSubscriptionTokens = {};
 
     this.attachEvents();
   }
@@ -25,7 +26,11 @@ export default class PeerList {
       .filter(user => this.users.indexOf(user.user_id) === -1)
       .map(this.generateRemoteUserElement)
       .forEach(el => {
-        this.users.push(el.id);
+        this.users.push({ id: el.id, username: el.username });
+        this.userSubscriptionTokens[el.id] =
+          this.emitter.on(`peer.${el.id}.file.transfer.request`, payload => {
+            this.emitter.emit('notification.file.transfer.request', { ...payload, id: el.id, username: el.username })
+          });
         document.querySelector('.userList').appendChild(el.render());
       });
   }
@@ -33,14 +38,18 @@ export default class PeerList {
   removeUser = ({ user_id }) => {
 //    this.emitter.request(`has.peer.dropped.${user_id}`)
 //      .then(
-    this.users = this.users.filter(id => id !== user_id);
-    document.querySelector(`.userList li[data-peer="${user_id}"]`).remove();
+    this.users = this.users.filter(user => user.id !== user_id);
+    [...document.querySelectorAll(`.userList li[data-peer="${user_id}"]`)].forEach(el => el.remove());
+    if (this.userSubscriptionTokens[user_id]) {
+      this.emitter.off(`peer.${user_id}.file.transfer.request`, this.userSubscriptionTokens[user_id]);
+      delete this.userSubscriptionTokens[user_id];
+    }
   }
 
   attachEvents() {
-    this.emitter.on('user.list', { fn: this.listUsers, scope: this });
-    this.emitter.on('user.update', { fn: this.listUser, scope: this });
-    this.emitter.on('user.remove', { fn: this.removeUser, scope: this });
+    this.emitter.on('user.list', this.listUsers);
+    this.emitter.on('user.update', this.listUser);
+    this.emitter.on('user.remove', this.removeUser);
     this.emitter.on('peer.connection.established', this.removeExpandedUser);
     document.querySelector('main').addEventListener('click', e => this.removeExpandedUser(e), false);
   }

@@ -110,6 +110,25 @@
   transition: transform 0.5s;
 }
 
+.dragOver {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 5;
+}
+
+.dragOver circle {
+  stroke-dashoffset: -251%;
+  transition: stroke-dashoffset 0.25s ease-out;
+}
+
+.dragged .dragOver circle {
+  stroke-dashoffset: -25%;
+}
+
 .userList > li:nth-of-type(1) {
   transform: translateY(-27rem) rotate(-60deg);
 }
@@ -221,7 +240,7 @@ input:checked ~ .user::before {
 .connected line {
   transition: stroke-dashoffset 0.5s ease-out;
   stroke-dashoffset: 100%;
-  animation: something 1.5s cubic-bezier(0, 0.25, 0.75, 1);
+  animation: connectedLine 1s ease-out;
   animation-fill-mode: forwards;
 }
 
@@ -234,8 +253,9 @@ input:checked ~ .user::before {
   }
 }
 
-@keyframes something {
+@keyframes connectedLine {
   to {
     stroke-dashoffset: 0;
   }
 }
+

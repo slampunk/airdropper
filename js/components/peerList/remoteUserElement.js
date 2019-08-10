@@ -69,11 +69,66 @@ export default class RemoteUserElement {
 
     this.element.appendChild(input);
     this.element.appendChild(container);
+    this.element.appendChild(this.fileDropSVG);
     /* Create necessary elements - end */
 
     /* Add event listeners to created elements - start */
     connectButton.addEventListener('click', this.initiateConnection, false);
+    fileInput.addEventListener('change', this.handleFileInput, false);
+    this.element.addEventListener('dragover', this.handleDragOver, false);
+    this.element.addEventListener('dragleave', this.handleDragLeave, false);
+    this.element.addEventListener('drop', this.handleFileDrop, false);
     /* Add event listeners to created elements - end */
+  }
+
+  handleDragOver = e => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (!e.currentTarget.classList.contains('dragged')) {
+      e.currentTarget.classList.add('dragged');
+    }
+  }
+
+  handleDragLeave = e => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (e.currentTarget.classList.contains('dragged')) {
+      e.currentTarget.classList.remove('dragged');
+    }
+  }
+
+  handleFileInput = e => {
+    this.emitter.emit(`peer.${this.id}.filetransfer.initiate`, e.target.files);
+  }
+
+  handleFileDrop = e => {
+    e.preventDefault();
+    this.emitter.emit(`peer.${this.id}.filetransfer.initiate`, e.dataTransfer.files);
+    this.handleDragLeave(e);
+  }
+
+  get fileDropSVG() {
+    let HEIGHT = this.element.clientHeight || 128;
+    let radius = HEIGHT * 0.4;
+    let circumference = 2 * Math.PI * (radius);
+    const svg = document.createElementNS(xmlns, 'svg');
+    svg.setAttribute('width', HEIGHT);
+    svg.setAttribute('height', HEIGHT);
+    svg.classList.add('dragOver');
+
+    const circle= document.createElementNS(xmlns, 'circle');
+    circle.setAttribute('cx', '50%');
+    circle.setAttribute('cy', '50%');
+    circle.setAttribute('fill', 'none');
+    circle.setAttribute('r', radius);
+    circle.setAttribute('stroke-dasharray', circumference);
+    circle.setAttribute('stroke', '#6ded00');
+    circle.setAttribute('stroke-width', '6');
+
+    svg.appendChild(circle);
+    return svg;
   }
 
   get transformCSS() {
@@ -81,7 +136,7 @@ export default class RemoteUserElement {
     //
     // window.getComputedStyle for transform returns `matrix(a b c d tx ty)`
     // for our transformations in R^2.
-    // We end up with a matrix
+    // We end up with a transformation matrix
     // | a c | = | cos(theta)  sin(theta) |
     // | b d |   | -sin(theta) cos(theta) |
     //
@@ -104,7 +159,9 @@ export default class RemoteUserElement {
   }
 
   appendConnectingSvg = () => {
-    if (this.element.querySelector('.connecting')) {
+    if (this.element.querySelector('.connecting') || this.element.querySelector('.connected')) {
+      // TODO: figure out how this works during renegotiation. coz there'll be a connection and
+      // above will be true
       return;
     }
 
@@ -126,9 +183,7 @@ export default class RemoteUserElement {
   }
 
   removeConnectingSvg = () => {
-   // setTimeout(() => {
-      [...this.element.querySelectorAll('.connecting')].forEach(el => el.remove());
-   // }, 500);
+    [...this.element.querySelectorAll('.connecting')].forEach(el => el.remove());
   }
 
   appendConnectedSvg = () => {
@@ -136,7 +191,6 @@ export default class RemoteUserElement {
       return;
     }
 
-    this.removeConnectingSvg();
     const transformation = this.transformCSS;
     const width = transformation.translateY - transformation.elementWidth - 15;
     const svg = document.createElementNS(xmlns, 'svg');
@@ -151,7 +205,6 @@ export default class RemoteUserElement {
     line.setAttribute('stroke', '#2e8b57');
     line.setAttribute('stroke-width', '4px');
     line.setAttribute('stroke-dasharray', width);
-//    line.setAttribute('stroke-dashoffset', width);
     svg.appendChild(line);
     this.element.appendChild(svg);
     line.setAttribute('stroke-dashoffset', 0);
@@ -173,7 +226,8 @@ export default class RemoteUserElement {
       }
     });
     this.emitter.on('peer.connection.established', id => {
-      if (id === this.id) {
+      if (id === this.id && !this.element.querySelector('.connected')) {
+        this.removeConnectingSvg();
         this.appendConnectedSvg();
       }
     });

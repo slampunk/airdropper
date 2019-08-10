@@ -11,17 +11,16 @@ export default class WebsocketTransport {
   handleSocketEvents() {
     this.socket.onopen = e => {
       this.emitter.emit('ws.open');
-      this.queue.forEach(this.sendMessage);
-      this.queue = [];
-    }
+      this.queue.splice(0).forEach(this.sendMessage);
+    };
 
     this.socket.onclose = e => {
       console.log('socket closed', e);
-    }
+    };
 
     this.socket.onerror = e => {
       console.log('socket error', e);
-    }
+    };
 
     this.socket.onmessage = e => {
       try {
@@ -29,11 +28,10 @@ export default class WebsocketTransport {
         this.emitter.emit(message.action, message.payload);
       } catch(e) {
       }
-    }
+    };
   }
 
   attachEvents() {
-    //this.emitter.on('ws.send', { fn: this.sendMessage, scope: this });
     this.emitter.on('ws.send', this.sendMessage);
   }
 
