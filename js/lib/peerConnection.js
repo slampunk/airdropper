@@ -30,7 +30,7 @@ export default class PeerConnection {
   }
 
   handleIceCandidate = (e) => {
-    if (e.candidate && e.candidate.candidate.indexOf('relay') > -1) {
+    if (e.candidate) {
       const details = {
         ...e.candidate.toJSON(),
         type: 'candidate'
