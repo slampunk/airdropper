@@ -1,20 +1,15 @@
-const pc_config = {
-  urls:[
-    { url: 'stun:stun.sipgate.net:3478' },
-    { url: 'stun:stun.sip.us:3478' }
-  ]
-};
-
 import PeerMessenger from './peerMessenger.js';
 
 export default class PeerConnection {
-  constructor({ emitter, peerId, initiate = false}) {
+  constructor({ emitter, peerId, initiate = false, pc_config}) {
     this.emitter = emitter;
     this.id = peerId;
+    this.pc_config = pc_config;
     this.candidatesQueue = [];
     this.messenger = null;
 
-    this.pc = new RTCPeerConnection(pc_config);
+    console.log(this.pc_config);
+    this.pc = new RTCPeerConnection(this.pc_config);
 
     this.handleRTCEvents();
 
@@ -35,7 +30,7 @@ export default class PeerConnection {
   }
 
   handleIceCandidate = (e) => {
-    if (e.candidate) {
+    if (e.candidate && e.candidate.candidate.indexOf('relay') > -1) {
       const details = {
         ...e.candidate.toJSON(),
         type: 'candidate'

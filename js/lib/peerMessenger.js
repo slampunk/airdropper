@@ -13,6 +13,10 @@ export default class PeerMessenger {
     this.headerByteLength = 20;
     this.historicRateWeight = 1;
 
+    this.pauseTransfers = false;
+    this.bufferHighWaterMark = 32768;
+    this.channel.bufferedAmountLowThreshold = 0;
+
     this.attachLocalEvents();
     this.attachChannelEvents();
   }
@@ -46,6 +50,10 @@ export default class PeerMessenger {
 
     this.channel.onclose = e => {
       console.log('channel closed');
+    }
+
+    this.channel.onbufferedamountlow = e => {
+      this.resumeTransfers();
     }
   }
 
@@ -156,6 +164,13 @@ export default class PeerMessenger {
     this.sendNextFile();
   }
 
+  resumeTransfers() {
+    this.pauseTransfers = false;
+    Object.keys(this.outgoingFiles)
+      .map(token => ({ token }))
+      .forEach(this.performFileTransfer);
+  }
+
   sendNextFile = () => {
     let nextToken = Object.keys(this.outgoingFiles).find(token => this.outgoingFilesCompleted.indexOf(token) === -1);
     if (!nextToken) {
@@ -209,22 +224,21 @@ export default class PeerMessenger {
     this.emitter.emit('peer.file.transfer.incoming', { token, name, size, id: this.id });
   }
 
-  performFileTransfer(details, startOffset = 0) {
+  performFileTransfer = (details) => {
     const { token, alwaysAccept } = details;
     if (alwaysAccept != undefined) {
       this.alwaysAccept = alwaysAccept;
     }
 
-    const { file, name, size, header, transferDelay, stopTransfer } = this.outgoingFiles[token];
+    const { file, name, size, header, transferDelay, stopTransfer, sentBytes } = this.outgoingFiles[token];
     const info = this.outgoingFiles[token];
 
     if (!file) {
-      console.log('theres no file by that name');
       return this.sendMessage('file.send.error', {error: `no file with token ${token}`});
     }
 
     const sliceFile = offset => {
-      if (stopTransfer) {
+      if (this.pauseTransfers || stopTransfer) {
         return;
       }
 
@@ -249,7 +263,8 @@ export default class PeerMessenger {
 
             let perc = ~~((offset + this.fileChunk) / file.size * 100);
             this.emitter.emit(`peer.file.transfer.progress-${token}`, perc, rate);
-            setTimeout(sliceFile, transferDelay, offset + this.fileChunk - this.headerByteLength);
+            info.sentBytes = offset + this.fileChunk - this.headerByteLength;
+            setTimeout(sliceFile, transferDelay, info.sentBytes);
           }
           else {
             this.sendMessage('file.transfer.complete', {token: token});
@@ -262,7 +277,7 @@ export default class PeerMessenger {
       let slice = file.slice(offset, offset + this.fileChunk - this.headerByteLength);
       reader.readAsArrayBuffer(slice);
     };
-    sliceFile(startOffset);
+    sliceFile(sentBytes);
 
     this.emitter.emit('peer.file.transfer.outgoing', { token, name, size, id: this.id });
   }
@@ -294,6 +309,10 @@ export default class PeerMessenger {
 
   sendBinaryData = (data) => {
     this.channel.send(data);
+
+    if (this.channel.bufferedAmount > this.bufferHighWaterMark) {
+      this.pauseTransfers = true;
+    }
   }
 
   send = (data) => {
